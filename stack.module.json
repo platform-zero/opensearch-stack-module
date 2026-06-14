@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "opensearch",
+  "repo": "opensearch-stack-module",
+  "runtimeId": "opensearch",
+  "lifecycle": "active",
+  "dependencies": [
+    "stack-foundation"
+  ],
+  "overlays": [
+    "stack.compose/opensearch.yml"
+  ]
+}
