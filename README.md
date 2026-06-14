@@ -1,3 +1,22 @@
-# opensearch-stack-module
+# opensearch stack module
 
-Stack module `opensearch` extracted from `sso-stack-generator`.
+- Module id: `opensearch`
+- Module repo: `opensearch-stack-module`
+- Source repo: none declared
+- Lifecycle: `active`
+
+## Owned overlays
+- `stack.compose/opensearch.yml`
+
+## Dependencies
+- `stack-foundation`
+
+## Validation
+
+```sh
+./tests/validate.sh
+```
+
+## Lifecycle
+
+`active` modules are expected to keep `stack.module.json`, owned overlays, and `tests/validate.sh` in sync.
