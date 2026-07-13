@@ -1,0 +1,50 @@
+---
+schemaVersion: 1
+module: "opensearch"
+target: "apps"
+services:
+  opensearch:
+    image: "opensearchproject/opensearch:2.19.3"
+    containerName: "opensearch"
+    lifecycle: "daemon"
+    updatePolicy: "registry"
+    placement: "rootful"
+    dependencies:
+      volume-init: "completed"
+    environment:
+      discovery.type: "single-node"
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: "${OPENSEARCH_ADMIN_PASSWORD}"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      plugins.security.ssl.http.enabled: "false"
+    networks:
+    - "opensearch"
+    - "caddy"
+    volumes:
+    - "opensearch_bind_data:/usr/share/opensearch/data"
+    health:
+      test:
+      - "CMD-SHELL"
+      - "curl --silent --fail --insecure \\\n  --user \"admin:$${OPENSEARCH_INITIAL_ADMIN_PASSWORD}\"\
+        \ \\\n  http://127.0.0.1:9200/_cluster/health >/dev/null\n"
+      interval: "10s"
+      timeout: "5s"
+      retries: 30
+      start_period: "90s"
+    restart: "unless-stopped"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    resources:
+      limits:
+        memory: "${OPENSEARCH_MEMORY_LIMIT:-3G}"
+        cpus: "${OPENSEARCH_CPU_LIMIT:-2.0}"
+networks: {}
+volumes:
+  opensearch_bind_data:
+    hostPath: "${VECTOR_DB_ROOT}/opensearch"
+    rootlessStrategy: "copy"
