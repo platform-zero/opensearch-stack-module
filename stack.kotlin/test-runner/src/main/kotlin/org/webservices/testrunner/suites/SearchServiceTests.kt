@@ -20,7 +20,7 @@ import org.webservices.testrunner.framework.TestRunner
 
 suspend fun TestRunner.searchServiceTests() = suite("OpenSearch Retrieval Provider") {
     val json = Json { ignoreUnknownKeys = true }
-    val sampleQuery = "Docker Compose"
+    val sampleQuery = "Podman runtime"
 
     suspend fun openSearchGet(path: String) =
         client.getRawResponse("${endpoints.searchService.trimEnd('/')}$path")
