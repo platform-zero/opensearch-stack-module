@@ -16,7 +16,6 @@
   "smoke": "external-only",
   "smokeUnsupportedReason": "requires generated bundle context, deployed networking, secrets, or service dependencies",
   "overlays": [
-    "stack.compose/opensearch.yml",
     "stack.containers/test-runner/playwright-tests/tests/deep/forward-auth/search.spec.ts",
     "stack.kotlin/test-runner/src/main/kotlin/org/webservices/testrunner/suites/SearchServiceTests.kt",
     "stack.runtime.yaml"
