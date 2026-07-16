@@ -22,7 +22,7 @@ test('OpenSearch - Access with forward auth', async ({ page }) => {
           const response = await fetch('/_cluster/health');
           return { ok: response.ok, status: response.status, body: await response.json().catch(() => ({})) };
         });
-        expect(health.ok, `OpenSearch health returned ${health.status}`).toBeTruthy();
+        expect(health.status, 'OpenSearch cluster health must return HTTP 200').toBe(200);
         expect(String((health.body as { status?: unknown }).status || '')).toMatch(/green|yellow|red/i);
 
         const search = await page.evaluate(async () => {
@@ -33,7 +33,8 @@ test('OpenSearch - Access with forward auth', async ({ page }) => {
           });
           return { ok: response.ok, status: response.status, body: await response.json().catch(() => ({})) };
         });
-        expect(search.ok, `OpenSearch _search returned ${search.status}`).toBeTruthy();
+        expect(search.status, 'OpenSearch knowledge search must return HTTP 200').toBe(200);
+        expect(search.body).toHaveProperty('hits.hits');
       },
     },
   );
