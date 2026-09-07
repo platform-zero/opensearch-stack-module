@@ -20,7 +20,7 @@ import org.webservices.testrunner.framework.TestRunner
 
 suspend fun TestRunner.searchServiceTests() = suite("OpenSearch Retrieval Provider") {
     val json = Json { ignoreUnknownKeys = true }
-    val sampleQuery = "Podman runtime"
+    var sampleQuery = "Podman runtime"
 
     suspend fun openSearchGet(path: String) =
         client.getRawResponse("${endpoints.searchService.trimEnd('/')}$path")
@@ -41,24 +41,17 @@ suspend fun TestRunner.searchServiceTests() = suite("OpenSearch Retrieval Provid
                 }
             }
         )
-        val hits = runCatching {
-            json.parseToJsonElement(initial.bodyAsText()).jsonObject["hits"]?.jsonObject
-                ?.get("total")?.jsonObject?.get("value")?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-        }.getOrDefault(0)
-        if (initial.status == HttpStatusCode.OK && hits > 0) {
-            return
+        require(initial.status == HttpStatusCode.OK) {
+            "OpenSearch sample lookup failed: HTTP ${initial.status.value} ${initial.bodyAsText()}"
         }
-
-        val run = client.postRaw("http://ingestion-runner:8090/run") {
-            contentType(ContentType.Application.Json)
-            setBody(buildJsonObject {
-                put("source", "stack_knowledge")
-                put("limit", 1)
-            })
-        }
-        require(run.status == HttpStatusCode.OK) {
-            "stack_knowledge sample ingestion failed: HTTP ${run.status.value} ${run.bodyAsText()}"
-        }
+        val firstSource = json.parseToJsonElement(initial.bodyAsText()).jsonObject["hits"]?.jsonObject
+            ?.get("hits")?.jsonArray?.firstOrNull()?.jsonObject?.get("_source")?.jsonObject
+        require(firstSource != null) { "OpenSearch knowledge index contains no sample documents" }
+        val searchable = listOf("title", "text")
+            .mapNotNull { firstSource[it]?.jsonPrimitive?.content }
+            .joinToString(" ")
+        sampleQuery = Regex("[A-Za-z0-9]{4,}").find(searchable)?.value
+            ?: error("OpenSearch sample document has no searchable term")
     }
 
     test("OpenSearch cluster is healthy") {
