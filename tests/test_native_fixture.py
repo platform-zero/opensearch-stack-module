@@ -15,6 +15,12 @@ class NativeFixtureTests(unittest.TestCase):
         self.assertIn('client.deleteRaw("$base/$index")', text)
         self.assertIn('} finally {', text)
 
+    def test_health_credentials_are_private_stdin_not_argv(self):
+        text = (SOURCE.parents[9] / 'stack.runtime.yaml').read_text()
+        self.assertIn('--config -', text)
+        self.assertNotIn('--user', text)
+        self.assertNotIn('--insecure', text)
+
     def test_native_identity_and_negative_status_required(self):
         text = SOURCE.read_text()
         self.assertIn('indexName = index', text)
