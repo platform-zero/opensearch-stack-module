@@ -15,6 +15,15 @@ class NativeFixtureTests(unittest.TestCase):
         self.assertIn('client.deleteRaw("$base/$index")', text)
         self.assertIn('} finally {', text)
 
+    def test_browser_read_accepts_empty_fresh_namespace_without_mutation(self):
+        path = Path(__file__).resolve().parents[1] / 'stack.containers/test-runner/playwright-tests/tests/deep/forward-auth/search.spec.ts'
+        text = path.read_text()
+        self.assertIn('/knowledge/_search?ignore_unavailable=true&allow_no_indices=true', text)
+        self.assertIn("expect(search.status", text)
+        self.assertIn('Array.isArray', text)
+        self.assertNotIn("method: 'PUT'", text)
+        self.assertNotIn("method: 'DELETE'", text)
+
     def test_health_credentials_are_private_stdin_not_argv(self):
         text = (SOURCE.parents[9] / 'stack.runtime.yaml').read_text()
         self.assertIn('--config -', text)

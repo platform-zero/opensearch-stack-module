@@ -26,7 +26,10 @@ test('OpenSearch - Access with forward auth', async ({ page }) => {
         expect(String((health.body as { status?: unknown }).status || '')).toMatch(/green|yellow|red/i);
 
         const search = await page.evaluate(async () => {
-          const response = await fetch('/knowledge/_search', {
+          // A fresh stack may have no owner knowledge index yet. Preserve the
+          // namespace and perform a real read without creating or replacing it;
+          // indexed retrieval is separately proved with an owned native fixture.
+          const response = await fetch('/knowledge/_search?ignore_unavailable=true&allow_no_indices=true', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ size: 1, query: { match_all: {} } }),
@@ -35,6 +38,7 @@ test('OpenSearch - Access with forward auth', async ({ page }) => {
         });
         expect(search.status, 'OpenSearch knowledge search must return HTTP 200').toBe(200);
         expect(search.body).toHaveProperty('hits.hits');
+        expect(Array.isArray((search.body as { hits: { hits: unknown } }).hits.hits)).toBe(true);
       },
     },
   );
